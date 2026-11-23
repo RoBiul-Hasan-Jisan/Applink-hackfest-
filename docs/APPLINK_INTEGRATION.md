@@ -1,0 +1,6 @@
+# Applink integration
+**Status: not integrated.** What exists: `integrations/applink/gateway.ts` (the contracts the engine uses: `SmsGateway.send/fetchInbound`, `OtpGateway.request/verify`), `applink.config.ts` (server-only credentials), `applink.errors.ts`, and `integrations/simulator.ts` (dev only). `createGateways('sandbox'|'live')` throws on purpose until real adapters exist. The server refuses `APPLINK_MODE=simulator` in production.
+
+To integrate (after the open questions are answered): implement `SmsGateway`/`OtpGateway` (and a USSD adapter) against the documented endpoints; put `applicationId`/`password` only in the JSON body from the backend; check the body `statusCode` on every response (not just HTTP status); time out; log request/message ids with masked numbers; retry only idempotent calls; add the confirmed callback route(s) calling `engine.handleInboundSms` / `engine.recordDeliveryReport`. Add adapter tests with official-format fixtures from the docs. Then test with an approved number and record the real request ids.
+
+Mode labelling: the UI banner shows SIMULATOR / SANDBOX / LIVE from `/health`. Costs: `/settings/usage` (assumed BDT 2 per SMS and per USSD screen, to verify).
