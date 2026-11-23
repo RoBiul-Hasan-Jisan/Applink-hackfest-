@@ -1,5 +1,5 @@
 # Go-live checklist
-1. **Applink**: approved application, provisioned server IP, credentials in a secret manager (never in git/frontend), confirmed callback auth, adapters implemented and tested against the real service (`APPLINK_OPEN_QUESTIONS.md` empty).
+1. **Applink**: approved application, provisioned static server IP, whitelisted test numbers, credentials in a secret manager (never in git/frontend), callback URLs registered (see `APPLINK_INTEGRATION.md`), the live verification checklist completed with real ids recorded, and every item in `APPLINK_OPEN_QUESTIONS.md` "Still open" answered.
 2. **Config**: `NODE_ENV=production` (simulator is refused), `APPLINK_MODE=live`, `SMS_LANGUAGE=en` unless Bangla confirmed, strong `PHONE_ENCRYPTION_KEY`/`PHONE_HASH_SECRET` (rotate plan documented), restricted `FRONTEND_ORIGIN`, TLS, private `EVIDENCE_DIR` on encrypted storage.
 3. **Privacy**: retention purge and erasure are implemented (see DATA_PRIVACY.md): confirm the retention period with the site, decide photo/audit/hash retention, review consent text and access.
 4. **Quality**: `npm run typecheck`, lint, `npm test`, frontend build, smoke test on a locked commit, rollback plan.

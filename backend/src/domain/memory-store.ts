@@ -49,7 +49,7 @@ export class MemoryStore implements Store {
   async saveSession(s: UssdSession) { this.sessions.set(s.sessionId, structuredClone(s)); }
   async deleteSession(i: string) { this.sessions.delete(i); }
   async markProcessed(k: string) { if (this.processed.has(k)) return false; this.processed.add(k); return true; }
-  async updateDeliveryStatus(id: string, st: string) { const m = this.messages.find((x) => x.providerMessageId === id); if (!m) return false; m.deliveryStatus = st; return true; }
+  async updateDeliveryStatus(id: string, st: string) { const m = this.messages.find((x) => x.providerMessageId === id || x.providerRequestId === id); if (!m) return false; m.deliveryStatus = st; return true; }
   async messageStats() {
     const sent = this.messages.filter((m) => m.status === 'sent'), delivered = sent.filter((m) => m.deliveryStatus === 'DELIVERED').length;
     return { total: this.messages.length, accepted: sent.length, failed: this.messages.length - sent.length, delivered, deliveryUnconfirmed: sent.length - delivered };

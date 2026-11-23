@@ -1,8 +1,24 @@
 # Applink integration
-**Status: not integrated.** What exists: `integrations/applink/gateway.ts` (the contracts the engine uses: `SmsGateway.send/fetchInbound`, `OtpGateway.request/verify`), `applink.config.ts` (server-only credentials), `applink.errors.ts`, and `integrations/simulator.ts` (dev only). `createGateways('sandbox'|'live')` throws on purpose until real adapters exist. The server refuses `APPLINK_MODE=simulator` in production.
+**Status: implemented against the official docs and tested only with fake HTTP shaped like the documented examples (82 tests). Not yet run against the live service: no Applink call has been made, so nothing here is "working" until you do the live checks below.**
 
-**Done and tested (71 tests):** `applink.client.ts`, the shared HTTP client. It puts `applicationId`/`password` only in the JSON body, sends `application/json;charset=utf-8`, checks the body `statusCode` on every response (HTTP 200 alone is not success), separates provider/timeout/network errors, retries only calls marked idempotent and only on timeout/network failure (never provider rejections, so no duplicate SMS), and logs without secrets or full numbers. It **assumes no success code**: set `APPLINK_SUCCESS_STATUS_CODES` from the official docs (required outside simulator mode). `status-codes.ts` is intentionally empty.
+| Piece | File | Docs |
+|---|---|---|
+| Shared client (creds in body, `S1000` check, timeouts, safe retries, masked logs) | `integrations/applink/applink.client.ts` | /docs/authentication |
+| SMS send + delivery request | `sms.adapter.ts` | /docs/sms `POST /sms/send` |
+| OTP request / verify (true only on `S1000`) | `otp.adapter.ts` | /docs/otp |
+| USSD send (`mt-cont` / `mt-fin`, encoding 440) | `ussd.adapter.ts` | /docs/ussd `POST /ussd/send` |
+| Callback handlers + routes | `callbacks.ts`, `routes/webhooks.ts` | `/ussd/receive`, `/sms/receive`, `/sms/report` |
+| Status codes (copied from docs) | `status-codes.ts` | |
 
-**Still to do (after the open questions are answered):** write the `SmsGateway`/`OtpGateway` adapters (and a USSD adapter) on top of that client using the documented endpoints and field names, wire `extractRefs` to the real request/message id fields; add the confirmed callback route(s) calling `engine.handleInboundSms` / `engine.recordDeliveryReport`. Add adapter tests with official-format fixtures from the docs. Then test with an approved number and record the real request ids.
+**Callback URLs to register in Applink provisioning** (HTTPS, public): `https://<host>/webhooks/applink/ussd/receive` (USSD connection URL), `https://<host>/webhooks/applink/sms/report` (delivery report URL), `https://<host>/webhooks/applink/sms/receive` (inbound SMS, if your app is configured to push; see open question #1). Routes are mounted only when `APPLINK_MODE=live`, and each only if `APPLINK_USSD_ENABLED` / `APPLINK_SMS_ENABLED` is true.
 
-Mode labelling: the UI banner shows SIMULATOR / SANDBOX / LIVE from `/health`. Costs: `/settings/usage` (assumed BDT 2 per SMS and per USSD screen, to verify).
+**Config (backend only):** `APPLINK_MODE=live`, `APPLINK_APPLICATION_ID`, `APPLINK_PASSWORD`, `APPLINK_SUCCESS_STATUS_CODES=S1000`, `APPLINK_TEL_STYLE`, optional `APPLINK_SOURCE_ADDRESS`, optional `APPLINK_CALLBACK_ALLOWED_IPS`, `APPLINK_{USSD,SMS,OTP}_ENABLED`. Your server must call from the IP provisioned for the app.
+
+## Live verification checklist (do these, record the real ids)
+1. Provision the app, get `applicationId` + API key, provision the server IP, whitelist test numbers.
+2. **SMS send**: trigger a report with SMS consent; confirm `requestId`/`messageId` in `/api/telecom`. If E1325/E1317, flip `APPLINK_TEL_STYLE`.
+3. **Delivery report**: confirm the callback arrives and the ledger moves from "accepted" to "delivered".
+4. **Inbound SMS**: text the short code `REPORT WATER <area>`; confirm the callback arrives (open question #1).
+5. **OTP**: request and verify for an approved volunteer; check there is no unexpected subscription/charge.
+6. **USSD** (only if provisioned): dial the service code; confirm menu, a full report, and `mt-fin` closing the session.
+Costs: assumed BDT 2/SMS and 2/USSD menu; verify on your pricing page. Mode banner in the UI shows LIVE/SIMULATOR.

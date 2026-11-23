@@ -19,7 +19,12 @@ const schema = z.object({
   APPLINK_APPLICATION_ID: z.string().default(''),
   APPLINK_PASSWORD: z.string().default(''),
   APPLINK_USSD_ENABLED: bool, APPLINK_SMS_ENABLED: bool, APPLINK_OTP_ENABLED: bool,
-  APPLINK_SUCCESS_STATUS_CODES: z.string().default('').transform((v) => v.split(',').map((x) => x.trim()).filter(Boolean)), // from the official docs; never assumed
+  // documented success code (docs/sms, ussd, otp); never assumed beyond that
+  APPLINK_SUCCESS_STATUS_CODES: z.string().default('S1000').transform((v) => v.split(',').map((x) => x.trim()).filter(Boolean)), // from the official docs; never assumed
+  // tel:8801... (documented error text, OTP) vs tel:+8801... (SMS examples): unresolved, test with Applink
+  APPLINK_TEL_STYLE: z.enum(['plain', 'plus']).default('plain'),
+  APPLINK_SOURCE_ADDRESS: z.string().default(''),
+  APPLINK_CALLBACK_ALLOWED_IPS: z.string().default('').transform((v) => v.split(',').map((x) => x.trim()).filter(Boolean)),
   WEBHOOK_SECRET: z.string().default(''),
   PHONE_ENCRYPTION_KEY: z.string().refine((v) => Buffer.from(v, 'base64').length === 32, 'must be 32 bytes base64'),
   PHONE_HASH_SECRET: z.string().min(16),

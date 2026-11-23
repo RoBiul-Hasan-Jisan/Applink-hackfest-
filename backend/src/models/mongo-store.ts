@@ -84,7 +84,7 @@ export class MongoStore implements Store {
   }
   async deleteSession(id: string) { await UssdSession.deleteOne({ sessionId: id }); }
   async markProcessed(key: string) { try { await ProcessedRequest.create({ key }); return true; } catch (e) { if (dupKey(e)) return false; throw e; } }
-  async updateDeliveryStatus(id: string, st: string) { return (await Message.updateOne({ providerMessageId: id }, { $set: { deliveryStatus: st } })).matchedCount === 1; }
+  async updateDeliveryStatus(id: string, st: string) { return (await Message.updateOne({ $or: [{ providerMessageId: id }, { providerRequestId: id }] }, { $set: { deliveryStatus: st } })).matchedCount === 1; }
   async messageStats() {
     const [total, accepted, delivered] = await Promise.all([Message.countDocuments(), Message.countDocuments({ status: 'sent' }), Message.countDocuments({ status: 'sent', deliveryStatus: 'DELIVERED' })]);
     return { total, accepted, failed: total - accepted, delivered, deliveryUnconfirmed: accepted - delivered };

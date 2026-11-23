@@ -10,4 +10,5 @@ export interface OtpGateway {
   request(phone: string): Promise<{ referenceNo: string; expiresAt: Date }>;
   verify(referenceNo: string, otp: string): Promise<boolean>; // true only on an explicit successful provider result
 }
-export interface Gateways { mode: 'simulator' | 'sandbox' | 'live'; sms: SmsGateway; otp: OtpGateway }
+export interface UssdGateway { send(m: { sessionId: string; to: string; message: string; end: boolean }): Promise<{ requestId: string }> }
+export interface Gateways { mode: 'simulator' | 'sandbox' | 'live'; sms: SmsGateway; otp: OtpGateway; ussd?: UssdGateway }

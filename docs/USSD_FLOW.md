@@ -1,5 +1,5 @@
 # USSD flow (optional until provisioned)
-Implemented: the **session state machine** (`domain/ussd-machine.ts`, tested). **Not implemented:** the Applink USSD adapter (operations `mo-init/mo-cont/mt-*`, `/ussd/send`, callback), pending `APPLINK_OPEN_QUESTIONS.md` #7. The machine returns `{text, continueSession}`; the adapter will map that to the documented operations and the real session id (used here as the idempotency key).
+Implemented: the **session state machine** (`domain/ussd-machine.ts`) and the **Applink USSD adapter + callback** per the official docs (`ussd.adapter.ts`, `callbacks.ts`), tested with documented-shape payloads but **not yet live-tested**. Flow: AppLink POSTs user input to our `/webhooks/applink/ussd/receive` → we acknowledge `S1000` immediately → the machine produces `{text, continueSession}` → we push it with `POST /ussd/send` (`mt-cont`, or `mt-fin` when the session ends). `mo-init` always restarts at the menu; the real AppLink `sessionId` is the session key and the idempotency key; repeated `requestId`s are ignored.
 
 All screens are plain ASCII and <= 160 characters (asserted in tests). Bangla Unicode is not used.
 

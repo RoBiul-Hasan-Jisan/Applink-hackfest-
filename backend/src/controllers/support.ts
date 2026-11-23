@@ -10,7 +10,8 @@ import { sanitizeImage, ImageError } from '../domain/image-sanitize.ts';
 import type { EvidenceStorage } from '../integrations/storage.ts';
 import type { EvidenceRef } from '../domain/types.ts';
 
-export interface Ctx { store: Store; engine: Engine; gw: Gateways; storage: EvidenceStorage; mode: 'simulator' | 'sandbox' | 'live'; slaHours: number; smsLanguage: string }
+import type { UssdGateway } from '../integrations/applink/gateway.ts';
+export interface Ctx { applink?: { applicationId: string; allowedIps: string[]; ussd?: UssdGateway; ussdEnabled: boolean; smsEnabled: boolean }; store: Store; engine: Engine; gw: Gateways; storage: EvidenceStorage; mode: 'simulator' | 'sandbox' | 'live'; slaHours: number; smsLanguage: string }
 export const ah = (fn: (req: Request, res: Response) => Promise<unknown>): RequestHandler => (req, res, next) => { fn(req, res).catch(next); };
 
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction): void {
