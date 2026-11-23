@@ -19,6 +19,7 @@ const schema = z.object({
   APPLINK_APPLICATION_ID: z.string().default(''),
   APPLINK_PASSWORD: z.string().default(''),
   APPLINK_USSD_ENABLED: bool, APPLINK_SMS_ENABLED: bool, APPLINK_OTP_ENABLED: bool,
+  APPLINK_SUCCESS_STATUS_CODES: z.string().default('').transform((v) => v.split(',').map((x) => x.trim()).filter(Boolean)), // from the official docs; never assumed
   WEBHOOK_SECRET: z.string().default(''),
   PHONE_ENCRYPTION_KEY: z.string().refine((v) => Buffer.from(v, 'base64').length === 32, 'must be 32 bytes base64'),
   PHONE_HASH_SECRET: z.string().min(16),
@@ -29,6 +30,8 @@ const schema = z.object({
     ctx.addIssue({ code: 'custom', message: 'APPLINK_MODE=simulator is not allowed in production: a simulator must never stand in for a live integration' });
   if (e.APPLINK_MODE !== 'simulator' && (!e.APPLINK_APPLICATION_ID || !e.APPLINK_PASSWORD))
     ctx.addIssue({ code: 'custom', message: 'APPLINK_APPLICATION_ID and APPLINK_PASSWORD required unless APPLINK_MODE=simulator' });
+  if (e.APPLINK_MODE !== 'simulator' && e.APPLINK_SUCCESS_STATUS_CODES.length === 0)
+    ctx.addIssue({ code: 'custom', message: 'APPLINK_SUCCESS_STATUS_CODES (documented success code(s)) required unless APPLINK_MODE=simulator' });
 });
 const parsed = schema.safeParse(process.env);
 if (!parsed.success) {

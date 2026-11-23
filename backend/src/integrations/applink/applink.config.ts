@@ -6,6 +6,7 @@ export const applinkConfig = {
   baseUrl: env.APPLINK_BASE_URL,
   applicationId: env.APPLINK_APPLICATION_ID,
   password: env.APPLINK_PASSWORD, // backend only; goes in the JSON request body per brief
+  successStatusCodes: env.APPLINK_SUCCESS_STATUS_CODES, // documented success code(s); empty in simulator mode
   contentType: 'application/json;charset=utf-8',
   enabled: { ussd: env.APPLINK_USSD_ENABLED, sms: env.APPLINK_SMS_ENABLED, otp: env.APPLINK_OTP_ENABLED },
 } as const;
