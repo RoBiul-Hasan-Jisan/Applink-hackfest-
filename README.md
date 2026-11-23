@@ -10,11 +10,11 @@ This merges two plans: **ActionNet** (USSD/SMS/OTP, schemas, volunteer workflow,
 ## Honest status
 | Area | State |
 |---|---|
-| Domain logic and orchestration (`backend/src/domain`) | Implemented. **65 tests pass** (`cd backend && npm test`, Node >= 22.18, no install needed). Strict `tsc` clean on this code |
+| Domain logic and orchestration (`backend/src/domain`) | Implemented. **71 tests pass** (`cd backend && npm test`, Node >= 22.18, no install needed). Strict `tsc` clean on this code |
 | ML pipeline (`ml/`) | Implemented with a release gate. **5 tests pass**. Ships **no data** |
 | Express API, Mongo store, Firebase auth/RBAC, scripts | Written. **Never run**: no packages/network were available when built. Expect to fix small integration issues on first `npm install && npm run typecheck` |
 | Frontend (Next.js) | Written. All 33 files parse. **Never built or run**. shadcn/ui is represented by hand-written primitives in `components/ui` (see `components.json` to add the CLI components) |
-| **Applink live adapters, webhooks, USSD/OTP transport** | **Not implemented.** Payloads are unconfirmed (`docs/APPLINK_OPEN_QUESTIONS.md`). Only the interface contracts and a clearly labelled dev **simulator** exist. **No Applink API has been called or tested** |
+| **Applink live adapters, webhooks, USSD/OTP transport** | **Not implemented.** Payloads are unconfirmed (`docs/APPLINK_OPEN_QUESTIONS.md`). Only the interface contracts, a tested shared HTTP client (`applink.client.ts`, no endpoint payloads) and a clearly labelled dev **simulator** exist. **No Applink API has been called or tested** |
 
 You are **not prize-eligible until one real Applink API works end to end**. That is the #1 task; see `docs/APPLINK_OPEN_QUESTIONS.md`.
 
